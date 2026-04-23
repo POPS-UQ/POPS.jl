@@ -158,24 +158,42 @@ function StatsAPI.predict(m::POPSModel{R,T}, X::AbstractMatrix;
 
         H_array = Array{T,1}(undef, N_test)
 
-        for i in 1:N_test
-            G_i = view(G_tensor, i, :, :) # Jacobian of model pushforward θ → (θ⊤)x_i (D × R)
 
-            M = R <= D ? Symmetric(G_i' * G_i) : Symmetric(G_i * G_i') # change Gram matrix depending on support dimensionality ?
+        if R <= D
 
-            log_det_M = logdet(M)
+            for i in 1:N_test
+                G_i = view(G_tensor, i, :, :) # Jacobian of model pushforward θ → (θ⊤)x_i (D × R)
 
-            if log_det_M == -Inf
-                @warn "Singular predictive distribution at data point $i"
-                H_array[i] = -Inf
-            else
-                H_array[i] = sum_log_w + T(0.5) * logdet(M)
+                M = Symmetric(G_i' * G_i)
+
+                log_det_M = logdet(M)
+
+                if log_det_M == -Inf
+                    @warn "Singular predictive distribution at data point $i"
+                    H_array[i] = -Inf
+                else
+                    H_array[i] = sum_log_w + T(0.5) * logdet(M)
+                end
+
+
             end
 
-        end
+        else # R > D
+            const_term = T((D / 2) * (1 + log(2π))) # constant term in Gaussian entropy
+            for i = 1:N_test
+                G_i = view(G_tensor, i, :, :)
 
+                scale_factors = widths ./ sqrt(T(12)) # (diagonal covariance for uniform random variable in hypercube-aligned coordinates)
+                G_scaled = G_i .* scale_factors'
+                Sigma = Symmetric(G_scaled * G_scaled') # covariance of predictive distribution
+                H_array[i] = const_term + logdet(Sigma)
+            end
+
+
+        end
         result = merge(result, (; entropy=H_array))
     end
+
 
     if return_samples
         result = merge(result, (; samples=Y_samples))

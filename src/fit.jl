@@ -77,6 +77,9 @@ function StatsAPI.fit(::Type{POPSModel}, X::AbstractMatrix, y::AbstractVecOrMat;
     rt = isnothing(rank_threshold) ? FT(eps(FT) * max(M, P * D)) : FT(rank_threshold)
     F = svd(T_corr_mat)
     R = max(count(>(rt * F.S[1]), F.S), 1)
+
+    (R > D) && @warn "output dim / effective rank = $(round(R/D,digits=2)) > 1 : predictive entropies will be based on a Gaussian approximation"
+
     V_R = F.V[:, 1:R]                      # (P·D) × R
     T_tilde = T_corr_mat * V_R             # M × R
     lower = NTuple{R,FT}(vec(minimum(T_tilde; dims=1)))
