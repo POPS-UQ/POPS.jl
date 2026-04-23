@@ -78,7 +78,7 @@ function StatsAPI.fit(::Type{POPSModel}, X::AbstractMatrix, y::AbstractVecOrMat;
     F = svd(T_corr_mat)
     R = max(count(>(rt * F.S[1]), F.S), 1)
 
-    (R > D) && @warn "effective rank/output dimension = $(round(R/D,digits=2)) > 1 : predictive entropies will be based on a Gaussian approximation"
+    (R > D) && @warn "effective rank ($R) > output dimension ($D). Predictive entropies will use Gaussian approximation."
 
     V_R = F.V[:, 1:R]                      # (P·D) × R
     T_tilde = T_corr_mat * V_R             # M × R
