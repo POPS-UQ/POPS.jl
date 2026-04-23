@@ -142,6 +142,38 @@ using PythonCall
         @test coef(m_full) ≈ coef(m_filt)
     end
 
+    @testset "pops minimizers interpolate (univariate)" begin
+        N, P = 100, 5
+        X = randn(rng, N, P)
+        w_true = randn(rng, P)
+        y = X * w_true + 0.5 * randn(rng, N)
+
+        m = fit(POPSModel, X, y; leverage_percentile=0.0)
+        w = coef(m)                          # P × 1
+        T_corr = m.pops_corrections          # N × P × 1
+
+        for i in 1:N
+            w_corrected = w .+ T_corr[i, :, :]  # P × 1
+            @test X[i, :]' * w_corrected ≈ [y[i]] atol = 1e-10
+        end
+    end
+
+    @testset "pops minimizers interpolate (multivariate)" begin
+        N, P, D = 80, 4, 3
+        X = randn(rng, N, P)
+        W_true = randn(rng, P, D)
+        Y = X * W_true + 0.5 * randn(rng, N, D)
+
+        m = fit(POPSModel, X, Y; leverage_percentile=0.0)
+        w = coef(m)                          # P × D
+        T_corr = m.pops_corrections          # N × P × D
+
+        for i in 1:N
+            w_corrected = w .+ T_corr[i, :, :]  # P × D
+            @test X[i, :]' * w_corrected ≈ Y[i, :]' atol = 1e-10
+        end
+    end
+
 
     @testset "multivariate regression" begin
         N, P, D = 100, 3, 2
