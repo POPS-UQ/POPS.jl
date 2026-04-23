@@ -40,14 +40,14 @@ function sample(rng::AbstractRNG, m::POPSModel{R,T}, n::Int;
         for i in 1:n
             x = l .+ widths .* rand(rng, NTuple{R,T})
             dW = reshape(m.rotation * collect(x), P, D)
-            samples[:, :, i] = m.weights .+ dW
+            samples[:, :, i] .= m.weights .+ dW
         end
     elseif sampling_method == :sobol
         s = SobolSeq(collect(l), collect(u))
         for i in 1:n
             x = next!(s)
             dW = reshape(m.rotation * x, P, D)
-            samples[:, :, i] = m.weights .+ dW
+            samples[:, :, i] .= m.weights .+ dW
         end
     else
         throw(ArgumentError("unknown sampling_method $(sampling_method); expected :uniform or :sobol"))
@@ -62,8 +62,8 @@ sample(m::POPSModel, n::Int; percentile::Real=1.0, sampling_method::Symbol=:unif
 """
     StatsAPI.predict(m::POPSModel, X::AbstractMatrix; return_bounds=true, return_std=false,
                     return_entropy=false, return_samples=false, 
-                    num_samples=max(2, 10 * ceil(Int, _pops_volume(m))), level=0.95,
-                    percentile=1.0, rng=Random.default_rng())
+                    sampling_density=10.0, sampling_method=:uniform,
+                    level=0.95, percentile=1.0, rng=Random.default_rng())
 
 Computes predictions for test feature matrix `X`, with uncertainty quantification 
 from the POPSModel posterior ensemble.
@@ -172,7 +172,7 @@ function StatsAPI.predict(m::POPSModel{R,T}, X::AbstractMatrix;
                     @warn "Singular predictive distribution at data point $i"
                     H_array[i] = -Inf
                 else
-                    H_array[i] = sum_log_w + T(0.5) * logdet(M)
+                    H_array[i] = sum_log_w + T(0.5) * log_det_M
                 end
 
 
@@ -180,13 +180,14 @@ function StatsAPI.predict(m::POPSModel{R,T}, X::AbstractMatrix;
 
         else # R > D
             const_term = T((D / 2) * (1 + log(2π))) # constant term in Gaussian entropy
+            scale_factors = widths ./ sqrt(T(12)) # (diagonal covariance for uniform random variable in hypercube-aligned coordinates)
+
             for i = 1:N_test
                 G_i = view(G_tensor, i, :, :)
 
-                scale_factors = widths ./ sqrt(T(12)) # (diagonal covariance for uniform random variable in hypercube-aligned coordinates)
                 G_scaled = G_i .* scale_factors'
                 Sigma = Symmetric(G_scaled * G_scaled') # covariance of predictive distribution
-                H_array[i] = const_term + logdet(Sigma)
+                H_array[i] = const_term + T(0.5) * logdet(Sigma)
             end
 
 
