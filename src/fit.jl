@@ -30,7 +30,8 @@ function StatsAPI.fit(::Type{POPSModel}, X::AbstractMatrix, y::AbstractVecOrMat;
     prior_covariance=nothing,
     leverage_percentile=0.5,
     rank_threshold=nothing,
-    fit_intercept=false)
+    fit_intercept=false,
+    verbose=false)
 
     @assert size(X, 1) == size(y, 1) "Number of rows in X and y must match"
 
@@ -54,7 +55,7 @@ function StatsAPI.fit(::Type{POPSModel}, X::AbstractMatrix, y::AbstractVecOrMat;
     C_mat = Symmetric(X_' * X_ + Sigma0 / N) # P × P, regularized covariance matrix
     C_fact = cholesky(C_mat)
 
-    A = C_fact \ X_'                       # P × N
+    A = C_fact \ X_'                       # P × N, influence matrix
     h = vec(sum(X_ .* A'; dims=2))         # N, leverage scores diag(X C⁻¹ X')
 
     w = A * y_                             # P × D ridge solution (global loss minimizer)
@@ -68,8 +69,9 @@ function StatsAPI.fit(::Type{POPSModel}, X::AbstractMatrix, y::AbstractVecOrMat;
     residuals_m = @view residuals[mask, :]       # M × D
     h_m = @view h[mask]                          # M
 
-    # POPS correction ΔΘ_i = (1/h_i) A_i r_iᵀ  (P × D), stacked as (M, P, D)
-    scaled = (A_m ./ h_m')'                # M × P, row i = a_iᵀ / h_i
+    # compute POPS corrections
+    # i-th POPS-constrained minimizer = ridge_solution + (1/leverage[i]) A[i] residual[i]ᵀ  (P × D), stacked as (M, P, D)
+    scaled = (A_m ./ h_m')'                # M × P, row i = A[i]ᵀ / leverage[i]
     T_corr = reshape(scaled, M, P, 1) .* reshape(residuals_m, M, 1, D)
     T_corr_mat = reshape(T_corr, M, P * D) # M × (P·D)
 
@@ -78,7 +80,7 @@ function StatsAPI.fit(::Type{POPSModel}, X::AbstractMatrix, y::AbstractVecOrMat;
     F = svd(T_corr_mat)
     R = max(count(>(rt * F.S[1]), F.S), 1)
 
-    (R > D) && @warn "effective rank ($R) > output dimension ($D). Predictive entropies will use Gaussian approximation."
+    (R > D) && verbose && @warn "effective rank ($R) > output dimension ($D). Predictive entropies will use Gaussian approximation."
 
     V_R = F.V[:, 1:R]                      # (P·D) × R
     T_tilde = T_corr_mat * V_R             # M × R
@@ -89,7 +91,7 @@ function StatsAPI.fit(::Type{POPSModel}, X::AbstractMatrix, y::AbstractVecOrMat;
         prior_covariance,
         leverage_percentile=lp,
         rank_threshold=rt,
-        weights=w,
+        coef=w,
         fit_intercept=fit_intercept,
         is_univariate=is_univariate,
         pops_corrections=T_corr,

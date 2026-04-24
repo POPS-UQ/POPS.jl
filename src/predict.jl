@@ -32,7 +32,7 @@ function sample(rng::AbstractRNG, m::POPSModel{R,T}, n::Int;
     sampling_method::Symbol=:uniform) where {R,T}
 
     l, u = _clipped_bounds(m.lower_bounds, m.upper_bounds, percentile)
-    P, D = size(m.weights)
+    P, D = size(m.coef)
     widths = u .- l
     samples = Array{T,3}(undef, P, D, n)
 
@@ -40,14 +40,14 @@ function sample(rng::AbstractRNG, m::POPSModel{R,T}, n::Int;
         for i in 1:n
             x = l .+ widths .* rand(rng, NTuple{R,T})
             dW = reshape(m.rotation * collect(x), P, D)
-            samples[:, :, i] .= m.weights .+ dW
+            samples[:, :, i] .= m.coef .+ dW
         end
     elseif sampling_method == :sobol
         s = SobolSeq(collect(l), collect(u))
         for i in 1:n
             x = next!(s)
             dW = reshape(m.rotation * x, P, D)
-            samples[:, :, i] .= m.weights .+ dW
+            samples[:, :, i] .= m.coef .+ dW
         end
     else
         throw(ArgumentError("unknown sampling_method $(sampling_method); expected :uniform or :sobol"))
@@ -106,7 +106,7 @@ function StatsAPI.predict(m::POPSModel{R,T}, X::AbstractMatrix;
 
     X_ = m.fit_intercept ? hcat(ones(T, size(X, 1)), T.(X)) : T.(X) # (N_test × P)
     N_test = size(X_, 1)
-    P, D = size(m.weights)
+    P, D = size(m.coef)
 
     _squeeze(y) = m.is_univariate ? dropdims(y, dims=2) : y
 

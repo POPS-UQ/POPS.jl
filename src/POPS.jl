@@ -36,7 +36,7 @@ responses under a separable prior `Γ = I_D ⊗ Σ₀`.
 - `rank_threshold`: relative threshold for determining the effective rank R
 
 # Fit results
-- `weights`: ridge solution, `P × D` matrix
+- `coef`: ridge solution, `P × D` matrix
 - `pops_corrections`: per-point corrections, `M × P × D` tensor (`M` = retained points)
 - `residuals`: `N × D` matrix of training residuals
 - `leverage_scores`: length-`N` vector
@@ -55,7 +55,7 @@ responses under a separable prior `Γ = I_D ⊗ Σ₀`.
     is_univariate::Bool
 
     # Fit results
-    weights::Matrix{T}
+    coef::Matrix{T}
     pops_corrections::Array{T,3}
     residuals::Matrix{T}
     leverage_scores::Vector{T}
@@ -70,9 +70,9 @@ end
 
 # StatsAPI: StatisticalModel methods
 
-StatsAPI.coef(m::POPSModel) = m.weights
+StatsAPI.coef(m::POPSModel) = m.coef
 StatsAPI.nobs(m::POPSModel) = size(m.residuals, 1)
-StatsAPI.dof(m::POPSModel) = size(m.weights, 1)
+StatsAPI.dof(m::POPSModel) = size(m.coef, 1)
 StatsAPI.islinear(::POPSModel) = true
 StatsAPI.isfitted(::POPSModel) = true
 StatsAPI.rss(m::POPSModel) = sum(abs2, m.residuals)
