@@ -20,20 +20,19 @@ export fit, predict, coef, nobs, dof, islinear, isfitted,
 
 A fitted POPS hypercube regression model.
 
-Implements the POPS-constrained hypercube ansatz from Swinburne & Perez (2025),
+Represents the POPS-covering hypercube ansatz from Swinburne & Perez (2025),
 providing misspecification-aware parameter uncertainties for linear surrogate models
-in the low-noise regime. Supports univariate (`D=1`) and multivariate (`D>1`)
-responses under a separable prior `Γ = I_D ⊗ Σ₀`.
+in the low-noise regime.
 
 # Type parameters
 - `R`: effective rank of the POPS correction matrix (dimensionality of the hypercube)
-- `T`: element type (e.g. `Float64`)
-- `S`: type of the prior covariance specification
+- `T`: numerical type of the data (e.g. `Float64`)
+- `S`: type of prior covariance
 
 # Fitting hyperparameters
-- `prior_covariance`: prior covariance specification used during fitting
-- `leverage_percentile`: training points with leverage below this quantile are dropped
-- `rank_threshold`: relative threshold for determining the effective rank R
+- `prior_covariance`: prior covariance used during fitting
+- `leverage_percentile`: observation blocks with leverage below this threshold are not used to fit the parameter distribution
+- `rank_threshold`: relative threshold used to determine the effective rank R
 
 # Fit results
 - `coef`: ridge solution, `P × D` matrix
@@ -72,17 +71,18 @@ end
 
 StatsAPI.coef(m::POPSModel) = m.coef
 StatsAPI.nobs(m::POPSModel) = size(m.residuals, 1)
-StatsAPI.dof(m::POPSModel) = size(m.coef, 1)
+StatsAPI.dof(m::POPSModel) = length(m.coef)
 StatsAPI.islinear(::POPSModel) = true
 StatsAPI.isfitted(::POPSModel) = true
 StatsAPI.rss(m::POPSModel) = sum(abs2, m.residuals)
-StatsAPI.vcov(m::POPSModel) = inv(m.C)
 
 # StatsAPI: RegressionModel methods
 
 StatsAPI.residuals(m::POPSModel) = m.residuals
 StatsAPI.leverage(m::POPSModel) = m.leverage_scores
 StatsAPI.dof_residual(m::POPSModel) = StatsAPI.nobs(m) - StatsAPI.dof(m)
+
+# TODO: implement other StatsAPI methods
 
 
 include("fit.jl")

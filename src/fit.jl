@@ -25,12 +25,14 @@ contribute to the hypercube fit (default `0.5`).
 - `rank_threshold`: relative singular-value threshold for computing effective rank.
 Default `eps(T) * max(M, P·D)`, where M is the number of samples used for fitting
 - `fit_intercept` : whether to add a constant colums to the feature matrix (default false)
+- `weights`: optional length-`N` vector of non-negative sample weights. Default to `nothing` (unit weights).
 """
 function StatsAPI.fit(::Type{POPSModel}, X::AbstractMatrix, y::AbstractVecOrMat;
     prior_covariance=nothing,
     leverage_percentile=0.5,
     rank_threshold=nothing,
     fit_intercept=false,
+    weights=nothing,
     verbose=false)
 
     @assert size(X, 1) == size(y, 1) "Number of rows in X and y must match"
@@ -51,14 +53,25 @@ function StatsAPI.fit(::Type{POPSModel}, X::AbstractMatrix, y::AbstractVecOrMat;
         P += 1
     end
 
+    if isnothing(weights)
+        WX_ = X_
+        Wy_ = y_
+    else
+        @assert length(weights) == N "length(weights) must equal the number of rows in X"
+        @assert all(>=(0), weights) "weights must be non-negative"
+        w_row = FT.(weights)
+        WX_ = w_row .* X_
+        Wy_ = w_row .* y_
+    end
+
     Sigma0 = _resolve_prior(prior_covariance, P, FT)
-    C_mat = Symmetric(X_' * X_ + Sigma0 / N) # P × P, regularized covariance matrix
+    C_mat = Symmetric(X_' * WX_ + Sigma0 / N) # P × P, regularized covariance matrix
     C_fact = cholesky(C_mat)
 
     A = C_fact \ X_'                       # P × N, influence matrix
     h = vec(sum(X_ .* A'; dims=2))         # N, leverage scores diag(X C⁻¹ X')
 
-    w = A * y_                             # P × D ridge solution (global loss minimizer)
+    w = A * Wy_                            # P × D ridge solution (global loss minimizer)
     residuals = y_ - X_ * w                # N × D
 
     # keep high-leverage points

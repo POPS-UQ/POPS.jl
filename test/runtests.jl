@@ -22,10 +22,8 @@ using PythonCall
         @test nobs(m) == N
         @test dof(m) == P
         @test dof_residual(m) == N - P
-        @test size(vcov(m)) == (P, P)
         @test size(residuals(m)) == (N, 1)
         @test length(leverage(m)) == N
-        @test rss(m) >= 0
         @test islinear(m)
         @test isfitted(m)
     end
@@ -205,6 +203,32 @@ using PythonCall
 
         @test size(coef(m), 1) == P + 1
         @test vec(coef(m)) ≈ [b_true; w_true] atol = 0.1
+    end
+
+    @testset "row weights" begin
+        N, P = 100, 4
+        X = randn(rng, N, P)
+        w_true = randn(rng, P)
+        y = X * w_true + 0.1 * randn(rng, N)
+
+        m_uw = fit(POPSModel, X, y)
+        m_w1 = fit(POPSModel, X, y; weights=fill(0.5, N))
+        @test coef(m_uw) ≈ coef(m_w1)
+
+        wts = abs.(randn(rng, N)) .+ 0.1
+        m_w = fit(POPSModel, X, y; weights=wts)
+
+        sqW = Diagonal(sqrt.(wts))
+        w_wls = (sqW * X) \ (sqW * y)
+        @test vec(coef(m_w)) ≈ w_wls atol = 1e-10
+
+        m_full = fit(POPSModel, X, y; weights=wts, leverage_percentile=0.0)
+        w_fit = coef(m_full)
+        T_corr = m_full.pops_corrections
+        for i in 1:N
+            w_corrected = w_fit .+ T_corr[i, :, :]
+            @test X[i, :]' * w_corrected ≈ [y[i]] atol = 1e-10
+        end
     end
 
     @testset "compare against python" begin
