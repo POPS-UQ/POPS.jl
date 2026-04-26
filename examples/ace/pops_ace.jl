@@ -3,7 +3,7 @@ Pkg.activate(@__DIR__)
 
 using ACEpotentials, ACEfit
 using POPS
-using LinearAlgebra, Random, Statistics
+using LinearAlgebra, Random, Statistics, DelimitedFiles
 
 data, _, _ = ACEpotentials.example_dataset("Si_tiny") # (down)load dataset
 
@@ -51,7 +51,10 @@ pred = predict(pops, A_te_p;
     sampling_method=:sobol)
 
 
-# gather results and print
+# gather results and print summary
+
+results = [pred.mean Y_te pred.lower pred.upper pred.std]
+writedlm(joinpath(@__DIR__, "test_results.out"), results)
 
 function data_masks(data_list, Ntot)
     e_mask = falses(Ntot)

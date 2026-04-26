@@ -1,5 +1,3 @@
-# TODO add support for structured weight matrices for linearly related multivariate outputs (e.g. look into Kronecker.jl)
-
 _resolve_prior(::Nothing, P::Int, ::Type{T}) where {T} = zeros(T, P, P) # No regularization
 _resolve_prior(alpha::Real, P::Int, ::Type{T}) where {T} = Matrix{T}(T(alpha) * I, P, P)
 _resolve_prior(d::AbstractVector, P::Int, ::Type{T}) where {T} = diagm(T.(d))
