@@ -112,7 +112,8 @@ function StatsAPI.predict(m::POPSModel{R,T}, X::AbstractMatrix;
 
     l_tup, u_tup = _clipped_bounds(m.lower_bounds, m.upper_bounds, percentile)
     posterior_vol = _hypercube_vol(l_tup, u_tup)
-    num_samples = clamp(ceil(Int, posterior_vol * sampling_density), min_samples:max_samples)
+    raw_samples = posterior_vol * sampling_density
+    num_samples = isfinite(raw_samples) ? clamp(ceil(Int, clamp(raw_samples, T(min_samples), T(max_samples))), min_samples, max_samples) : max_samples
 
 
     W_samples = sample(rng, m, num_samples; percentile, sampling_method) # (P × D × num_samples)
