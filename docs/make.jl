@@ -15,10 +15,6 @@ makedocs(;
     pages=[
         "Home" => "index.md",
         "API" => "api.md",
-        "Examples" => [
-            "ACE potential" => "ace.md",
-            "MD reweighting" => "md.md",
-        ],
     ],
 )
 
