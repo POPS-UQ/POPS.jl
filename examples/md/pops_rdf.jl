@@ -167,6 +167,6 @@ band!(ax, r_centers, g_lo, g_hi; color=(:blue, 0.3), label="min/max bounds (POPS
 lines!(ax, r_centers, g0; color=:black, label="ridge MLIP", linewidth=0.5)
 axislegend(ax; position=:rt)
 
-out = joinpath(@__DIR__, "rdf_pops.pdf")
+out = joinpath(@__DIR__, "rdf_pops.png")
 save(out, fig)
 println("wrote $out")
