@@ -2,7 +2,7 @@
 CurrentModule = POPS
 ```
 
-# Example: uncertainty propagation in molecular dynamics
+# Example: Molecular Dynamics
 
 This example takes a POPS-fitted ACE potential, runs a single molecular dynamics
 trajectory of bulk silicon under the *mean* (ridge) potential, and uses

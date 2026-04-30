@@ -2,7 +2,7 @@
 CurrentModule = POPS
 ```
 
-# Example: parameter uncertainties in ACE interatomic potentials
+# Example: ACE interatomic potential
 
 In this example, we fit a linear ACE (Atomic Cluster Expansion) interatomic potential
 on the `Si_tiny` silicon dataset from [Bartok et. al, 2018](https://doi.org/10.1103/PhysRevX.8.041048).
@@ -117,9 +117,4 @@ end
 atom_counts = [length(d.system) for d in test]
 println("Energy residuals per atom (eV) : ", residual[e_mask] ./ atom_counts)
 println("Atom counts: ", atom_counts)
-```
-
-**Output**
-```
-
 ```
