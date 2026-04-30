@@ -78,11 +78,10 @@ A constant feature column is added if `m.fit_intercept` is `true`.
 - `return_std=false` : return empirical stds from predictive distribution at each input.
 - `return_entropy=false` : return the (analytical) differential entropies of the predictive distribution at each input (restricted to its support if effective rank is less than the output dimension).
 - `return_samples=false` : return the empirical samples used for prediction at each input.
-- `sampling_density` : governs the number of samples used for uncertainty quantification. The number of samples is `sampling_density` times the hypervolume of the posterior support (clipped using the `percentile` parameter)
+- `sampling_density=5.0` : governs the number of posterior parameter samples. The number of samples used for inference is equal to `sampling_density` times the number of parameters used to fit the ensemble.
+- `min_samples=100` : optional minimum number of posterior samples used for inference is sampling_density is too low relative to the size of the dataset.
 - `level=0.95` : determines the quantiles for the empirical bounds (e.g., `0.95` gives the 2.5% and 97.5% quantiles). Set to `1.0` for min-max bounds.
 - `percentile=1.0` : fraction of hypercube volume (centered around mean prediction) to draw samples from.
-- `min_samples=30` : minimum number of posterior samples (useful for well-specified models)
-- `max_samples=1000` : maximum number of posterior samples (useful for poorly-specified or high-dimensional models)
 - `rng` : optional PRNG
 - `sampling_method=:uniform`. The method used to generate samples, currently implemented methods are `:uniform` and `:sobol` (low-discrepancy quasi Monte Carlo sampling)
 
@@ -96,12 +95,11 @@ function StatsAPI.predict(m::POPSModel{R,T}, X::AbstractMatrix;
     return_std::Bool=false,
     return_entropy::Bool=false,
     return_samples::Bool=false,
-    sampling_density::Real=10.0,
+    sampling_density::Real=5.0,
+    min_samples::Int=100,
     sampling_method::Symbol=:uniform,
     level::Real=0.95,
     percentile::Real=1.0, # TODO remove redundant parameters
-    min_samples::Int=30,
-    max_samples::Int=1000,
     rng::AbstractRNG=Random.default_rng()) where {R,T}
 
     X_ = m.fit_intercept ? hcat(ones(T, size(X, 1)), T.(X)) : T.(X) # (N_test × P)
@@ -113,8 +111,8 @@ function StatsAPI.predict(m::POPSModel{R,T}, X::AbstractMatrix;
     l_tup, u_tup = _clipped_bounds(m.lower_bounds, m.upper_bounds, percentile)
     posterior_vol = _hypercube_vol(l_tup, u_tup)
     raw_samples = posterior_vol * sampling_density
-    num_samples = isfinite(raw_samples) ? clamp(ceil(Int, clamp(raw_samples, T(min_samples), T(max_samples))), min_samples, max_samples) : max_samples
 
+    num_samples = max(min_samples, round(Int, sampling_density * size(m.leverage_scores, 1)))
 
     W_samples = sample(rng, m, num_samples; percentile, sampling_method) # (P × D × num_samples)
     Y_samples = reshape(X_ * reshape(W_samples, P, D * num_samples), N_test, D, num_samples) # (N_test × D × num_samples)
