@@ -10,12 +10,13 @@ data, _, _ = ACEpotentials.example_dataset("Si_tiny") # (down)load dataset
 rng = Xoshiro(17)
 perm = randperm(rng, length(data))
 n_train = round(Int, 0.9 * length(data))
+
 train_raw = data[perm[1:n_train]]
 test_raw = data[perm[n_train+1:end]]
 
 println("Silicon dataset: $(length(data)) total structures (train=$(length(train_raw)), test=$(length(test_raw)))")
 
-Eref = [:Si => -158.54496821] # single silicon atom DFT energy
+Eref = [:Si => -158.54496821] # single silicon atom DFT energy (eV)
 model = ace1_model(; elements=[:Si], order=3, totaldegree=10, rcut=5.5, Eref=Eref) # ACE basis
 n_basis = length(model.ps.WB) + length(model.ps.Wpair)
 
@@ -56,7 +57,7 @@ pred = predict(pops, A_te_p;
 results = [pred.mean Y_te pred.lower pred.upper pred.std]
 writedlm(joinpath(@__DIR__, "test_results.out"), results)
 
-function data_masks(data_list, Ntot)
+function data_masks(data_list, Ntot) # computes boolean masks to separate rows corresponding to energies, forces and virials
     e_mask = falses(Ntot)
     f_mask = falses(Ntot)
     v_mask = falses(Ntot)
@@ -66,8 +67,7 @@ function data_masks(data_list, Ntot)
         nobs = ACEfit.count_observations(d)
         e_mask[row+1] = true
         f_mask[row+2:row+1+3*N_at] .= true
-        v_mask[row+2+3*N_at:row+nobs] .= true   # empty for isolated atom
-
+        v_mask[row+2+3*N_at:row+nobs] .= true
         row += nobs
     end
     return e_mask, f_mask, v_mask
@@ -78,27 +78,15 @@ e_mask, f_mask, v_mask = data_masks(test, length(Y_te))
 residual = pred.mean .- Y_te
 is_in_bounds = pred.lower .< Y_te .< pred.upper
 
-channels = (
-    E=(label="Energies", mask=e_mask),
-    F=(label="Forces", mask=f_mask),
-    V=(label="Virials", mask=v_mask),
-)
+for (label, mask, unit) in (("Energies", e_mask, "eV"), ("Forces", f_mask, "eV/Å"), ("Virials", v_mask, "eV"))
+    println("="^10, " $label ", "="^10)
+    println("$(sum(is_in_bounds[mask]))/$((sum(mask))) in POPS bound")
+    println("Mean residual ($unit) :    ", mean(abs, residual[mask]))
+    println("Mean posterior σ/residual :  ", mean(abs, pred.std[mask] ./ residual[mask]))
 
-stats = map(channels) do c
-    m = c.mask
-    (
-        label=c.label,
-        err=mean(abs, residual[m]),
-        pct_inbounds=round(100 * mean(is_in_bounds[m]), digits=2),
-        rel_err=mean(abs, pred.std[m] ./ residual[m]),
-    )
 end
 
-for s in stats
-    println("="^10, " $(s.label) ", "="^10)
-    println("% in POPS bounds: $(s.pct_inbounds)")
-    println("Average error: $(s.err)")
-    println("Average σ/error: $(s.rel_err)")
-end
-
+atom_counts = [length(d.system) for d in test]
+println("Energy residuals per atom (eV) : ", residual[e_mask] ./ atom_counts)
+println("Atom counts: ", atom_counts)
 

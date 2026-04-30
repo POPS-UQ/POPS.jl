@@ -56,7 +56,7 @@ sys_md = Molly.System(sys0; force_units=u"eV/Å", energy_units=u"eV")
 
 sys_md = Molly.System(
     sys_md;
-    general_inters=(model,),
+    general_inters=(fast_evaluator(model),),
     velocities=Molly.random_velocities(sys_md, T_md)
 )
 
