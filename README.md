@@ -1,5 +1,7 @@
 # POPS.jl
 
+[![docs](https://img.shields.io/badge/docs-dev_blue.svg)](https://noeblassel.github.io/POPS.jl)
+
 A library of probabilistic surrogate models targeting the low-noise, misspecified regime, written in Julia.
 The name comes from the POPS regression algorithm from [Perez & Swinburne (2025)](https://doi.org/10.1088/2632-2153/ad9fce).
                                                                                                                                                                                         
