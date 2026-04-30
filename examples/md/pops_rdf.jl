@@ -54,23 +54,10 @@ rattle!(sys0, 0.03)
 
 sys_md = Molly.System(sys0; force_units=u"eV/Å", energy_units=u"eV")
 
-
-n_atoms = length(sys_md)
-eligible = trues(n_atoms, n_atoms)
-for i in 1:n_atoms
-    eligible[i, i] = false
-end
-nf = CellListMapNeighborFinder(
-    eligible=eligible,
-    dist_cutoff=1.2rcut * u"Å",
-    n_steps=10,
-    unit_cell=sys_md.boundary,
-)
 sys_md = Molly.System(
     sys_md;
     general_inters=(model,),
-    velocities=Molly.random_velocities(sys_md, T_md),
-    neighbor_finder=nf,
+    velocities=Molly.random_velocities(sys_md, T_md)
 )
 
 simulator = Langevin(
@@ -80,9 +67,7 @@ simulator = Langevin(
 
 println()
 
-
 # Equilibrate system for 2 ps
-
 
 println("equilibrating...")
 Molly.simulate!(sys_md, simulator, 2_000)
@@ -106,12 +91,12 @@ function pair_histogram!(h::AbstractVector{<:Integer}, sys, edges)
     return h
 end
 
-# Sample for 10 ps
+# Sample for 20 ps
 
-n_frames = 100
+n_frames = 200
 chunk_steps = 100
-n_bins = 100
-r_max = 8.14u"Å"             # < L/2 ≈ 8.15 Å for the (2,2,2) cell
+n_bins = 300
+r_max = 8.14u"Å"             # < L/2 ≈ 8.15 Å
 edges = range(0.0u"Å", r_max, length=n_bins + 1)
 
 ace_features_buf = zeros(n_basis, n_frames) # buffer for ACE energy features
@@ -141,13 +126,13 @@ function rdf_normalize(h_avg, edges, sys)
     return g
 end
 
-# POPS reweighting
+# reweight to POPS ensemble
 
 n_samples = 2000 # number of posterior samples
 S_pre = sample(pops, n_samples; sampling_method=:sobol)   # n_basis × n_samples
-β = ustrip(u"eV^-1", 1 / (Unitful.k * T_md))           # 1/eV
+β = ustrip(u"eV^-1", 1 / (Unitful.k * T_md)) # 1/eV
 
-Hf = Float64.(histos_buf)                                      # n_frames × n_bins
+Hf = Float64.(histos_buf) # n_frames × n_bins
 g_samples = zeros(n_samples, n_bins) # rdfs
 
 for s in 1:n_samples
