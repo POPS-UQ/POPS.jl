@@ -19,6 +19,6 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/noeblassel/POPS.jl",
+    repo="github.com/noeblassel/POPS.jl.git",
     devbranch="main",
 )
