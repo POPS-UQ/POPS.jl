@@ -113,8 +113,4 @@ for (label, mask, unit) in (("Energies", e_mask, "eV"), ("Forces", f_mask, "eV/Ã
     println("Mean posterior Ïƒ/residual :  ", mean(abs, pred.std[mask] ./ residual[mask]))
 
 end
-
-atom_counts = [length(d.system) for d in test]
-println("Energy residuals per atom (eV) : ", residual[e_mask] ./ atom_counts)
-println("Atom counts: ", atom_counts)
 ```

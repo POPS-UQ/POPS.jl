@@ -176,6 +176,6 @@ save(joinpath(@__DIR__, "rdf_pops.pdf"), fig)
 
 **Result**
 
-![RDF plot](assets/rdf.pdf)
+![RDF plot](images/rdf.png)
 
 The black line corresponds to the RDF estimated from the ridge trajectory. The blue band corresponds to the min/max bounds obtained from the reweighted RDF ensemble.
