@@ -4,12 +4,11 @@ CurrentModule = POPS
 
 # Example: ACE interatomic potential
 
-In this example, we fit a linear ACE (Atomic Cluster Expansion) interatomic potential
+In this example, we fit a linear [ACE](https://doi.org/10.1103/PhysRevB.99.014104) (Atomic Cluster Expansion) interatomic potential
 on the `Si_tiny` silicon dataset from [Bartok et. al, 2018](https://doi.org/10.1103/PhysRevX.8.041048).
 The dataset is provided as an artifact by [`ACEpotentials.jl`](https://github.com/ACEsuit/ACEpotentials.jl).
 
-In this test, we use POPS regression to attach predictive uncertainties to the energies, forces and virials predicted
-on a held-out test set.
+In this test, we use POPS regression to attach predictive uncertainties to the energies, forces and virials on a held-out test set.
 
 The full script is available in the repository under
 [`examples/ace/pops_ace.jl`](https://github.com/noeblassel/POPS.jl/blob/main/examples/ace/pops_ace.jl), and can be run by following the instructions described [here](#running-the-examples).

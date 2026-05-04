@@ -1,19 +1,38 @@
-```@meta
+\theta_0,N```@meta
 CurrentModule = POPS
 ```
 
 # Example: Molecular Dynamics
 
-This example takes a POPS-fitted ACE potential, runs a single molecular dynamics
-trajectory of bulk silicon under the *mean* (ridge) potential, and uses
-Boltzmann reweighting to propagate parameter uncertainty into bounds on a
-thermodynamic observable — here the radial distribution function (RDF) at
-300 K. This relies on the simple formula
+This example shows how to propagate model uncertainties from the ACE example to molecular dynamics trajectories. We use the same potential as the [ACE](ace.md) example.
+A single trajectory of molecular dynamics is performed, using [Molly.jl](https://github.com/JuliaMolSim/Molly.jl) on a bulk silicon system under the *mean* potential (corresponding to the ridge regression parameter).
+
+A reweighting procedure is then applied to estimates of a thermodynamic property — here the radial distribution function (RDF) — obtained from the trajectory. The reweighting procedure relies on the simple idea of importance sampling, or Boltzmann reweighting.
+
+
+## Theory: Boltzmann reweighting
+
+Suppose we have a trajectory of atomic configurations ``\{q_i\}_{i=1}^N`` obtained from MD sampling (or any Boltwmann sampling scheme, for that matter) of the potential energy surface defined by the ridge regression parameter ``\theta_0``. We estimate the expectation of any observable ``f(q)`` using the trajectory average
 
 ```math
-\int f(q) \mathrm{e}^{-\beta U(q;\theta)} \mathrm{d}q
-= \int f(q) \mathrm{e}^{-\beta U(q;\theta_0)} \frac{\mathrm{e}^{-\beta U(q;\theta)}}{\mathrm{e}^{-\beta U(q;\theta_0)}} \mathrm{d}q
+\hat{f}_{\theta_0,N} = \frac{1}{N} \sum_{i=1}^N f(q_i) \xrightarrow{N \to \infty} \left(\int f(q) \mathrm{e}^{-\beta U(q;\theta_0)} \mathrm{d}q\right) \bigg/ \left(\int \mathrm{e}^{-\beta U(q;\theta_0)} \mathrm{d}q\right).
 ```
+
+Now for $\theta\neq\theta_0$, using the identity
+```math
+\left(\int f(q) \mathrm{e}^{-\beta U(q;\theta)} \mathrm{d}q\right) \bigg/ \left(\int \mathrm{e}^{-\beta U(q;\theta)} \mathrm{d}q\right)
+= \left(\int f(q) \frac{\mathrm{e}^{-\beta U(q;\theta)}}{\mathrm{e}^{-\beta U(q;\theta_0)}} \mathrm{e}^{-\beta U(q;\theta_0)} \mathrm{d}q\right) \bigg/ \left(\int \frac{\mathrm{e}^{-\beta U(q;\theta)}}{\mathrm{e}^{-\beta U(q;\theta_0)}} \mathrm{e}^{-\beta U(q;\theta_0)} \mathrm{d}q\right),
+```
+we can reweight the trajectory samples to obtain an estimator of the Bolzmann average of $f$ under any potential defined by a parameter sample ``\theta``. More precisely, we compute
+
+```math
+\hat{f}_{\theta_0\to\theta,N} =\frac{\sum_{i=1}^N w_i f(q_i)}{\sum_{i=1}^N w_i}, \quad \text{where } w_i = \mathrm{e}^{-\beta (U(q_i;\theta) - U(q_i;\theta_0))}.
+```
+
+This allows to efficiently estimate the distribution of thermodynamic averages with respect to a given posterior distribution over model parameters, such as the POPS ensemble.
+Here we propagate model uncertainties to estimates of the [radial distribution function](https://en.wikipedia.org/wiki/Radial_distribution_function) (RDF) ``g(r)`` of bulk silicon at 300 K.
+
+After discretization of the RDF in bins of the variable ``r``, the Boltzmann reweighting procedure applies component-wise.
 
 The full script is available in the repository under
 [`examples/md/pops_rdf.jl`](https://github.com/noeblassel/POPS.jl/blob/main/examples/md/pops_rdf.jl).
