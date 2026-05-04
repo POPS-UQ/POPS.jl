@@ -19,6 +19,7 @@ Suppose we have a trajectory of atomic configurations ``\{q_i\}_{i=1}^N`` obtain
 ```
 
 Now for $\theta\neq\theta_0$, using the identity
+
 ```math
 \left(\int f(q) \mathrm{e}^{-\beta U(q;\theta)} \mathrm{d}q\right) \bigg/ \left(\int \mathrm{e}^{-\beta U(q;\theta)} \mathrm{d}q\right)
 = \left(\int f(q) \frac{\mathrm{e}^{-\beta U(q;\theta)}}{\mathrm{e}^{-\beta U(q;\theta_0)}} \mathrm{e}^{-\beta U(q;\theta_0)} \mathrm{d}q\right) \bigg/ \left(\int \frac{\mathrm{e}^{-\beta U(q;\theta)}}{\mathrm{e}^{-\beta U(q;\theta_0)}} \mathrm{e}^{-\beta U(q;\theta_0)} \mathrm{d}q\right),
