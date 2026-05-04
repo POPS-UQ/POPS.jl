@@ -1,4 +1,4 @@
-\theta_0,N```@meta
+```@meta
 CurrentModule = POPS
 ```
 
