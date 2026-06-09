@@ -24,7 +24,7 @@ Implemented models follow the
 
 ```julia
 using Pkg
-Pkg.add(url="https://github.com/noeblassel/POPS.jl")
+Pkg.add(url="https://github.com/POPS-UQ/POPS.jl")
 ```
 
 ## Running tests
@@ -56,7 +56,7 @@ The same applies to the ACE example under `examples/ace/`.
 ## Quick start
 
 ```julia
-using POPS, Random
+using POPSmodels, Random
 
 rng = Xoshiro(0)
 N, P, D = 200, 5, 2

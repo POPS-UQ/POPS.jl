@@ -5,10 +5,10 @@ DocMeta.setdocmeta!(POPSmodels, :DocTestSetup, :(using POPSmodels); recursive=tr
 
 makedocs(;
     modules=[POPSmodels],
-    authors="Noe Blassel",
+    authors="POPS-UQ organization",
     sitename="POPSmodels.jl",
     format=Documenter.HTML(;
-        canonical="https://POPS-UQ.github.io/POPS.jl",
+        canonical="https://POPS-UQ.github.io/POPSmodels.jl",
         edit_link="main",
         assets=String[],
     ),
