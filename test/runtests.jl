@@ -1,12 +1,12 @@
 using Test
-using POPSmodels
+using POPSRegression
 using LinearAlgebra
 using Random
 using Statistics
 using CondaPkg
 using PythonCall
 
-@testset "POPSmodels.jl" begin
+@testset "POPSRegression.jl" begin
 
     rng = Xoshiro(123)
 

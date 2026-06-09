@@ -1,5 +1,5 @@
 ```@meta
-CurrentModule = POPSmodels
+CurrentModule = POPSRegression
 ```
 
 # API Reference

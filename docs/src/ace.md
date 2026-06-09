@@ -1,5 +1,5 @@
 ```@meta
-CurrentModule = POPSmodels
+CurrentModule = POPSRegression
 ```
 
 # Example: ACE interatomic potential
@@ -18,7 +18,7 @@ The full script is available in the repository under
 We start by following the `ACEpotentials` workflow, first loading the dataset.
 ```julia
 using ACEpotentials, ACEfit
-using POPSmodels
+using POPSRegression
 using LinearAlgebra, Random, Statistics, DelimitedFiles
 
 data, _, _ = ACEpotentials.example_dataset("Si_tiny")

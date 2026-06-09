@@ -1,5 +1,5 @@
 ```@meta
-CurrentModule = POPSmodels
+CurrentModule = POPSRegression
 ```
 
 # Example: Molecular Dynamics
@@ -46,7 +46,7 @@ keep the full `Si_tiny` dataset for fitting in this example.
 
 ```julia
 using ACEpotentials, ACEfit
-using POPSmodels
+using POPSRegression
 using AtomsBuilder
 using Molly
 using Unitful

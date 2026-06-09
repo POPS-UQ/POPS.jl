@@ -2,7 +2,7 @@ using Pkg
 Pkg.activate(@__DIR__)
 
 using ACEpotentials, ACEfit
-using POPSmodels
+using POPSRegression
 using AtomsBuilder
 using Molly
 using Unitful

@@ -1,8 +1,8 @@
 ```@meta
-CurrentModule = POPSmodels
+CurrentModule = POPSRegression
 ```
 
-# POPSmodels.jl
+# POPSRegression.jl
 
 A Julia library of probabilistic surrogate models adapted to misspecified functional
 forms in the small observation noise regime.
@@ -56,7 +56,7 @@ The same applies to the ACE example under `examples/ace/`.
 ## Quick start
 
 ```julia
-using POPSmodels, Random
+using POPSRegression, Random
 
 rng = Xoshiro(0)
 N, P, D = 200, 5, 2

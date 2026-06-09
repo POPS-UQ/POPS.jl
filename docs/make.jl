@@ -1,14 +1,14 @@
 using Documenter
-using POPSmodels
+using POPSRegression
 
-DocMeta.setdocmeta!(POPSmodels, :DocTestSetup, :(using POPSmodels); recursive=true)
+DocMeta.setdocmeta!(POPSRegression, :DocTestSetup, :(using POPSRegression); recursive=true)
 
 makedocs(;
-    modules=[POPSmodels],
+    modules=[POPSRegression],
     authors="POPS-UQ organization",
-    sitename="POPSmodels.jl",
+    sitename="POPSRegression.jl",
     format=Documenter.HTML(;
-        canonical="https://POPS-UQ.github.io/POPSmodels.jl",
+        canonical="https://POPS-UQ.github.io/POPSRegression.jl",
         edit_link="main",
         assets=String[],
     ),
