@@ -1,14 +1,14 @@
 using Documenter
-using POPS
+using POPSmodels
 
-DocMeta.setdocmeta!(POPS, :DocTestSetup, :(using POPS); recursive=true)
+DocMeta.setdocmeta!(POPSmodels, :DocTestSetup, :(using POPSmodels); recursive=true)
 
 makedocs(;
-    modules=[POPS],
+    modules=[POPSmodels],
     authors="Noe Blassel",
-    sitename="POPS.jl",
+    sitename="POPSmodels.jl",
     format=Documenter.HTML(;
-        canonical="https://noeblassel.github.io/POPS.jl",
+        canonical="https://POPS-UQ.github.io/POPS.jl",
         edit_link="main",
         assets=String[],
     ),
@@ -21,6 +21,6 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/noeblassel/POPS.jl.git",
+    repo="github.com/POPS-UQ/POPS.jl.git",
     devbranch="main",
 )

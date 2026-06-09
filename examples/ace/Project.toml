@@ -5,4 +5,4 @@ CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 POPSmodels = "859322f3-d3c4-465e-abc9-91eac1a3a159"
 
 [sources]
-POPS = {path="../../POPS.jl"}
+POPSmodels = {path="../.."}

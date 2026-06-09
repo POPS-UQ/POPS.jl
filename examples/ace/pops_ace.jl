@@ -2,7 +2,7 @@ using Pkg
 Pkg.activate(@__DIR__)
 
 using ACEpotentials, ACEfit
-using POPS
+using POPSmodels
 using LinearAlgebra, Random, Statistics, DelimitedFiles
 
 data, _, _ = ACEpotentials.example_dataset("Si_tiny") # (down)load dataset

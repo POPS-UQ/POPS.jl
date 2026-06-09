@@ -1,12 +1,12 @@
 using Test
-using POPS
+using POPSmodels
 using LinearAlgebra
 using Random
 using Statistics
 using CondaPkg
 using PythonCall
 
-@testset "POPS.jl" begin
+@testset "POPSmodels.jl" begin
 
     rng = Xoshiro(123)
 
@@ -53,7 +53,7 @@ using PythonCall
         @test pred.mean ≈ newX * vec(coef(m)) atol = 0.5
     end
 
-    @testset "uq" begin
+    @testset "uq_basic_functionality" begin
         N, P = 100, 3
         X = randn(rng, N, P)
         y = X * ones(P) + 0.1 * randn(rng, N)
