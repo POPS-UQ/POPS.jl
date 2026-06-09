@@ -1,8 +1,8 @@
 ```@meta
-CurrentModule = POPS
+CurrentModule = POPSmodels
 ```
 
-# POPS.jl
+# POPSmodels.jl
 
 A Julia library of probabilistic surrogate models adapted to misspecified functional
 forms in the small observation noise regime.

@@ -1,4 +1,4 @@
-module POPS
+module POPSmodels
 
 import StatsAPI
 import StatsAPI: fit, predict, coef, nobs, dof, islinear, isfitted,
