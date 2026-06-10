@@ -21,6 +21,6 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/POPS-UQ/POPS.jl.git",
+    repo="github.com/POPS-UQ/POPSRegression.jl.git",
     devbranch="main",
 )

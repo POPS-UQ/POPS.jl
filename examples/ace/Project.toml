@@ -9,3 +9,4 @@ POPSRegression = {path="../.."}
 [compat]
 ACEfit = "0.3.1"
 CairoMakie = "0.15.11"
+ACEpotentials = "0.10.1"
