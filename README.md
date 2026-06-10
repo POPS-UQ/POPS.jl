@@ -1,4 +1,4 @@
-# POPS.jl
+# POPSRegression.jl
 
 [![docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://POPS-UQ.github.io/POPSRegression.jl)
 
